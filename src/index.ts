@@ -1,5 +1,4 @@
 import express from 'express';
-import bodyParser from 'body-parser';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import connectDB from './config/db';
@@ -12,14 +11,14 @@ const app = express();
 connectDB()
 
 app.use(cors());
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: false }));
-app.use(morgan('dev'))
-app.use('/api/v1', routes)
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use(morgan('dev'));
 
 app.get('/', (req, res) => {
   res.send('Welcome to Etite Events Platform');
 });
+app.use('/api/v1', routes)
 
 app.listen(PORT, () => console.log(`server is listening on ${PORT}`));
 

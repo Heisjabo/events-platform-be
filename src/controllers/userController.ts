@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { createUser, getUsers,checkUser, removeUser, editUser, getSingleUser } from "../services/user.service"
+import { createUser, getUsers,checkUser, removeUser, updateUserById, getSingleUser } from "../services/user.service"
 import bcrypt from "bcryptjs";
 import dotenv from "dotenv";
 import { userSchema, authSchema, updateUserSchema } from "../utils/validations";
@@ -93,26 +93,23 @@ export const deleteUser = async (req: Request, res: Response) => {
 
 export const updateUser = async (req: Request, res: Response) => {
     try{
-        const { error, value } = updateUserSchema.validate(req.body);
-        if (error) {
-            return res.status(400).json({
-                status: 'Error',
-                message: error.details[0].message,
-            });
-        }
-        if(value.email){
+        const { id } = req.params
+        const { name, email, role, password} = req.body
+        if(email){
             return res.status(403).json({
                 message: 'updating email is not allowed'
             })
         }
-        if(!value.name && !value.password && !value.role ){
+        
+        if(!name && !password && !role && !req.file ){
             return res.status(400).json({
                 status: "Error",
                 message: "Please add any field to update"
             });
         }
-        const user = await editUser(req.params.id, value);
-        res.status(201).json({
+        //@ts-ignore
+        const user = await updateUserById(id, req.body, req.file );
+        return res.status(200).json({
             status: "success",
             message: "user updated successfully!",
         });

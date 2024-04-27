@@ -1,5 +1,7 @@
 import User from "../models/user";
 import { UserType } from "../models/user";
+import uploadFile from "../utils/cloud";
+import bcrypt from 'bcryptjs'
 
 export const createUser = async (user: UserType) => {
     const newUser = await User.create(user);
@@ -32,7 +34,18 @@ export const removeUser = async (id: string) => {
     return
 }
 
-export const editUser = async (id: string, user: UserType) => {
-    const newUser = await User.findByIdAndUpdate(id, user);
-    return newUser
-}
+export const updateUserById = async (id: string, user: Partial<UserType>, file: Express.Multer.File) => {
+    let result;
+    if (file) result = await uploadFile(file);
+    let hashedPass;
+    if(user.password){
+        const salt = await bcrypt.genSalt(10);
+        hashedPass = await bcrypt.hash(user.password, salt);
+    }
+    return await User.findByIdAndUpdate(id, {
+      name: user.name,
+      role: user.role,
+      password: hashedPass,
+      profileImage: result?.secure_url,
+    });
+  };
